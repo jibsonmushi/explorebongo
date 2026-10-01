@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
-export function Logo({ className, light }: { className?: string; light?: boolean }) {
+export function Logo({ className, light }: { className?: string | undefined; light?: boolean | undefined }) {
   return (
     <Link to="/" className={cn("flex items-center gap-2", className)}>
       <span className="grid h-9 w-9 place-items-center rounded-full bg-gold font-display text-lg font-bold text-gold-foreground">

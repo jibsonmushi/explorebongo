@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  validateSearch: (s: Record<string, unknown>) => ({ section: typeof s.section === "string" ? s.section : "overview" }),
+  validateSearch: (s: Record<string, unknown>) => ({ section: typeof s["section"] === "string" ? (s["section"] as string) : undefined } as { section?: string | undefined }),
   head: () => ({ meta: [{ title: "My Dashboard — ExploreBongo" }, { name: "robots", content: "noindex" }] }),
   component: TouristDashboard,
 });
@@ -20,7 +20,7 @@ const items = [
 ];
 
 function TouristDashboard() {
-  const { section } = Route.useSearch();
+  const section = Route.useSearch().section ?? "overview";
   const { user } = Route.useRouteContext();
   const profile = useQuery({
     queryKey: ["profile", user.id],
@@ -68,10 +68,10 @@ function ProfileForm({ profile, onSaved }: { profile: { id: string; first_name: 
     const f = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
     setSaving(true);
     const { error } = await supabase.from("profiles").update({
-      first_name: f.first_name.slice(0, 60), last_name: f.last_name.slice(0, 60), phone: f.phone.slice(0, 30), country: f.country.slice(0, 60),
+      first_name: (f["first_name"] ?? "").slice(0, 60), last_name: (f["last_name"] ?? "").slice(0, 60), phone: (f["phone"] ?? "").slice(0, 30), country: (f["country"] ?? "").slice(0, 60),
     }).eq("id", profile.id);
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Profile saved"); onSaved();
   };
   return (

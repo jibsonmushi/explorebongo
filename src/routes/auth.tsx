@@ -11,7 +11,7 @@ import { homeForRoles, type AppRole } from "@/lib/auth";
 import hero from "@/assets/zanzibar.jpg";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>) => ({ mode: s.mode === "signup" ? ("signup" as const) : ("login" as const) }),
+  validateSearch: (s: Record<string, unknown>) => ({ mode: s["mode"] === "signup" ? ("signup" as const) : undefined } as { mode?: "signup" | "login" | undefined }),
   head: () => ({
     meta: [
       { title: "Login or Sign Up — ExploreBongo" },
@@ -38,7 +38,7 @@ async function goHome(navigate: ReturnType<typeof useNavigate>, userId: string) 
 }
 
 function AuthPage() {
-  const { mode } = Route.useSearch();
+  const mode = Route.useSearch().mode ?? "login";
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -50,7 +50,7 @@ function AuthPage() {
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email: String(f.get("email")), password: String(f.get("password")) });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     await goHome(navigate, data.user.id);
   };
 
@@ -58,7 +58,7 @@ function AuthPage() {
     e.preventDefault();
     const email = String(new FormData(e.currentTarget).get("email"));
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Check your email for a reset link.");
     setForgot(false);
   };
@@ -66,7 +66,7 @@ function AuthPage() {
   const onSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const parsed = signupSchema.safeParse(Object.fromEntries(new FormData(e.currentTarget)));
-    if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    if (!parsed.success) { toast.error(parsed.error.issues[0]?.message); return; }
     const { email, password, ...meta } = parsed.data;
     setLoading(true);
     const { error } = await supabase.auth.signUp({
@@ -74,13 +74,13 @@ function AuthPage() {
       options: { emailRedirectTo: window.location.origin, data: { ...meta, role: "tourist" } },
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setSent(true);
   };
 
   const google = async () => {
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (r.error) return toast.error(r.error.message ?? "Google sign-in failed");
+    if (r.error) { toast.error(r.error.message ?? "Google sign-in failed"); return; }
     if (r.redirected) return;
     const { data } = await supabase.auth.getUser();
     if (data.user) await goHome(navigate, data.user.id);

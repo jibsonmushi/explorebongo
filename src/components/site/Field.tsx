@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function Field({ name, label, type = "text", defaultValue, required = true }: { name: string; label: string; type?: string; defaultValue?: string; required?: boolean }) {
+export function Field({ name, label, type = "text", defaultValue, required = true }: { name: string; label: string; type?: string | undefined; defaultValue?: string | undefined; required?: boolean | undefined }) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={name}>{label}</Label>

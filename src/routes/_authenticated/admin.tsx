@@ -11,7 +11,7 @@ type VStatus = Database["public"]["Enums"]["verification_status"];
 const STATUSES: VStatus[] = ["PENDING", "UNDER_REVIEW", "APPROVED", "REJECTED", "SUSPENDED"];
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  validateSearch: (s: Record<string, unknown>) => ({ section: typeof s.section === "string" ? s.section : "overview" }),
+  validateSearch: (s: Record<string, unknown>) => ({ section: typeof s["section"] === "string" ? (s["section"] as string) : undefined } as { section?: string | undefined }),
   head: () => ({ meta: [{ title: "Admin — ExploreBongo" }, { name: "robots", content: "noindex" }] }),
   component: Admin,
 });
@@ -24,7 +24,7 @@ const items = [
 ];
 
 function Admin() {
-  const { section } = Route.useSearch();
+  const section = Route.useSearch().section ?? "overview";
   const { user } = Route.useRouteContext();
   const isAdmin = useQuery({
     queryKey: ["is-admin", user.id],
@@ -47,7 +47,7 @@ function Admin() {
 
   const setStatus = async (id: string, status: VStatus) => {
     const { error } = await supabase.from("provider_profiles").update({ verification_status: status }).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`Status set to ${status}`); providers.refetch();
   };
 
