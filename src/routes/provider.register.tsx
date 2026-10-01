@@ -65,13 +65,13 @@ function Register() {
   const step1 = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const r = accountSchema.safeParse(Object.fromEntries(new FormData(e.currentTarget)));
-    if (!r.success) return toast.error(r.error.issues[0].message);
+    if (!r.success) { toast.error(r.error.issues[0]?.message); return; }
     setAccount(r.data); setStep(1);
   };
   const step2 = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const r = businessSchema.safeParse({ ...Object.fromEntries(new FormData(e.currentTarget)), provider_type: ptype });
-    if (!r.success) return toast.error(r.error.issues[0].message);
+    if (!r.success) { toast.error(r.error.issues[0]?.message); return; }
     setBusiness(r.data); setStep(2);
   };
   const submit = async () => {
@@ -86,7 +86,7 @@ function Register() {
       },
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setDone(true);
   };
 

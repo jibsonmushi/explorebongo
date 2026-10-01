@@ -5,7 +5,7 @@ import { DashboardShell, Placeholder, StatCard, NoAccess } from "@/components/da
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 
 export const Route = createFileRoute("/_authenticated/provider")({
-  validateSearch: (s: Record<string, unknown>) => ({ section: typeof s.section === "string" ? s.section : "overview" }),
+  validateSearch: (s: Record<string, unknown>) => ({ section: typeof s["section"] === "string" ? (s["section"] as string) : undefined } as { section?: string | undefined }),
   head: () => ({ meta: [{ title: "Provider Dashboard — ExploreBongo" }, { name: "robots", content: "noindex" }] }),
   component: ProviderDashboard,
 });
@@ -18,7 +18,7 @@ const items = [
 ];
 
 function ProviderDashboard() {
-  const { section } = Route.useSearch();
+  const section = Route.useSearch().section ?? "overview";
   const { user } = Route.useRouteContext();
   const q = useQuery({
     queryKey: ["provider", user.id],
