@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790853410143,
+      "tag": "0000_explorebongo_foundation",
+      "breakpoints": true
+    }
+  ]
 }
