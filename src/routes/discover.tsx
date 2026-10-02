@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,12 +43,12 @@ function Discover() {
         {services.data && services.data.length > 0 ? (
           <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {services.data.map((s) => (
-              <div key={s.id} className="rounded-2xl border bg-card p-6 shadow-card">
+              <Link key={s.id} to="/services/$id" params={{ id: s.id }} className="rounded-2xl border bg-card p-6 shadow-card transition hover:-translate-y-0.5">
                 <p className="text-xs text-muted-foreground">{s.provider_profiles?.business_name}</p>
                 <h3 className="mt-1 text-lg font-semibold">{s.title}</h3>
                 <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{s.description}</p>
                 <p className="mt-4 font-semibold text-primary">{s.currency} {Number(s.price).toLocaleString()}</p>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (
