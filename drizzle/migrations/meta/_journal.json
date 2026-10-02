@@ -15,6 +15,13 @@
       "when": 1790853436199,
       "tag": "0001_provider_signup_trigger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790920889280,
+      "tag": "0002_booking_flow_and_admin",
+      "breakpoints": true
     }
   ]
 }
