@@ -15,11 +15,13 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BecomeProviderRouteImport } from './routes/become-provider'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as TripRouteImport } from './routes/trip'
 import { Route as TripPlannerRouteImport } from './routes/trip-planner'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedProviderRouteImport } from './routes/_authenticated/provider'
 import { Route as ProviderRegisterRouteImport } from './routes/provider.register'
+import { Route as ServicesIdRouteImport } from './routes/services.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -50,6 +52,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TripRoute = TripRouteImport.update({
+  id: '/trip',
+  path: '/trip',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TripPlannerRoute = TripPlannerRouteImport.update({
   id: '/trip-planner',
   path: '/trip-planner',
@@ -75,6 +82,11 @@ const ProviderRegisterRoute = ProviderRegisterRouteImport.update({
   path: '/provider/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicesIdRoute = ServicesIdRouteImport.update({
+  id: '/services/$id',
+  path: '/services/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -82,11 +94,13 @@ export interface FileRoutesByFullPath {
   '/become-provider': typeof BecomeProviderRoute
   '/discover': typeof DiscoverRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/trip': typeof TripRoute
   '/trip-planner': typeof TripPlannerRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/provider': typeof AuthenticatedProviderRoute
   '/provider/register': typeof ProviderRegisterRoute
+  '/services/$id': typeof ServicesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,11 +108,13 @@ export interface FileRoutesByTo {
   '/become-provider': typeof BecomeProviderRoute
   '/discover': typeof DiscoverRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/trip': typeof TripRoute
   '/trip-planner': typeof TripPlannerRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/provider': typeof AuthenticatedProviderRoute
   '/provider/register': typeof ProviderRegisterRoute
+  '/services/$id': typeof ServicesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -108,11 +124,13 @@ export interface FileRoutesById {
   '/become-provider': typeof BecomeProviderRoute
   '/discover': typeof DiscoverRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/trip': typeof TripRoute
   '/trip-planner': typeof TripPlannerRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/provider': typeof AuthenticatedProviderRoute
   '/provider/register': typeof ProviderRegisterRoute
+  '/services/$id': typeof ServicesIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -122,11 +140,13 @@ export interface FileRouteTypes {
     | '/become-provider'
     | '/discover'
     | '/reset-password'
+    | '/trip'
     | '/trip-planner'
     | '/admin'
     | '/dashboard'
     | '/provider'
     | '/provider/register'
+    | '/services/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -134,11 +154,13 @@ export interface FileRouteTypes {
     | '/become-provider'
     | '/discover'
     | '/reset-password'
+    | '/trip'
     | '/trip-planner'
     | '/admin'
     | '/dashboard'
     | '/provider'
     | '/provider/register'
+    | '/services/$id'
   id:
     | '__root__'
     | '/'
@@ -147,11 +169,13 @@ export interface FileRouteTypes {
     | '/become-provider'
     | '/discover'
     | '/reset-password'
+    | '/trip'
     | '/trip-planner'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/provider'
     | '/provider/register'
+    | '/services/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -161,8 +185,10 @@ export interface RootRouteChildren {
   BecomeProviderRoute: typeof BecomeProviderRoute
   DiscoverRoute: typeof DiscoverRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TripRoute: typeof TripRoute
   TripPlannerRoute: typeof TripPlannerRoute
   ProviderRegisterRoute: typeof ProviderRegisterRoute
+  ServicesIdRoute: typeof ServicesIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -209,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trip': {
+      id: '/trip'
+      path: '/trip'
+      fullPath: '/trip'
+      preLoaderRoute: typeof TripRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trip-planner': {
       id: '/trip-planner'
       path: '/trip-planner'
@@ -244,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProviderRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/services/$id': {
+      id: '/services/$id'
+      path: '/services/$id'
+      fullPath: '/services/$id'
+      preLoaderRoute: typeof ServicesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -269,8 +309,10 @@ const rootRouteChildren: RootRouteChildren = {
   BecomeProviderRoute: BecomeProviderRoute,
   DiscoverRoute: DiscoverRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TripRoute: TripRoute,
   TripPlannerRoute: TripPlannerRoute,
   ProviderRegisterRoute: ProviderRegisterRoute,
+  ServicesIdRoute: ServicesIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

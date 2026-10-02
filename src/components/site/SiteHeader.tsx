@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 const links = [
   { to: "/discover", label: "Discover" },
   { to: "/trip-planner", label: "AI Trip Planner" },
+  { to: "/trip", label: "My Trip" },
   { to: "/become-provider", label: "Become a Provider" },
 ] as const;
 
