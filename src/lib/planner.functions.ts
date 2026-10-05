@@ -26,37 +26,45 @@ export const generatePlan = createServerFn({ method: "POST" })
       destination: s.destinations?.name ?? null, category: s.categories?.name ?? null, about: (s.description ?? "").slice(0, 200),
     }));
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const schema = {
+      type: "object", additionalProperties: false,
+      required: ["title", "overview", "days", "estimated_total_usd"],
+      properties: {
+        title: { type: "string" }, overview: { type: "string" }, estimated_total_usd: { type: "number" },
+        days: { type: "array", items: { type: "object", additionalProperties: false, required: ["day", "title", "summary", "service_ids"],
+          properties: { day: { type: "integer" }, title: { type: "string" }, summary: { type: "string" }, service_ids: { type: "array", items: { type: "string" } } } } },
+      },
+    };
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
-      headers: { Authorization: `Bearer ${process.env["LOVABLE_API_KEY"]}`, "Content-Type": "application/json" },
+      headers: { "Lovable-API-Key": process.env["LOVABLE_API_KEY"]!, "X-Lovable-AIG-SDK": "fetch", "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: "You are a Tanzania travel planner for ExploreBongo. Build realistic day-by-day itineraries. Only reference service ids from the provided catalog; if none fit a day, leave service_ids empty and give general advice. Respect the budget." },
+        model: "openai/gpt-6-astra",
+        reasoning: { effort: "low" },
+        store: false,
+        stream: true,
+        text: { format: { type: "json_schema", name: "trip_plan", strict: true, schema } },
+        input: [
+          { role: "system", content: "You are a Tanzania travel planner for ExploreBongo. Build realistic day-by-day itineraries. Only reference service ids from the provided catalog; if none fit a day, leave service_ids empty and give general advice. Respect the budget. Keep each summary under 60 words." },
           { role: "user", content: `Trip: ${data.days} days, ${data.travelers} traveler(s), budget USD ${data.budget}. Interests: ${data.interests || "general"}.\nCatalog: ${JSON.stringify(catalog)}` },
         ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "return_plan",
-            parameters: {
-              type: "object",
-              properties: {
-                title: { type: "string" }, overview: { type: "string" }, estimated_total_usd: { type: "number" },
-                days: { type: "array", items: { type: "object", properties: { day: { type: "integer" }, title: { type: "string" }, summary: { type: "string" }, service_ids: { type: "array", items: { type: "string" } } }, required: ["day", "title", "summary", "service_ids"] } },
-              },
-              required: ["title", "overview", "days", "estimated_total_usd"],
-            },
-          },
-        }],
-        tool_choice: { type: "function", function: { name: "return_plan" } },
       }),
     });
     if (res.status === 429) throw new Error("The planner is busy right now. Please try again in a minute.");
     if (res.status === 402) throw new Error("AI credits are exhausted. Please contact ExploreBongo.");
-    if (!res.ok) throw new Error("Could not generate a plan. Please try again.");
-    const json = await res.json();
-    const args = json.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    if (!res.ok || !res.body) throw new Error("Could not generate a plan. Please try again.");
+    let args = "", buf = "";
+    const reader = res.body.getReader(); const dec = new TextDecoder();
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split("\n"); buf = lines.pop() ?? "";
+      for (const l of lines) {
+        if (!l.startsWith("data:")) continue;
+        try { const ev = JSON.parse(l.slice(5).trim()); if (ev.type === "response.output_text.delta") args += ev.delta; } catch { /* ignore */ }
+      }
+    }
     if (!args) throw new Error("Could not generate a plan. Please try again.");
     const plan = JSON.parse(args) as Plan;
     const valid = new Set(catalog.map((c) => c.id));

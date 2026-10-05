@@ -29,6 +29,13 @@
       "when": 1791174596488,
       "tag": "0003_admin_reviews_moderation",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791175206979,
+      "tag": "0004_bootstrap_admin_email",
+      "breakpoints": true
     }
   ]
 }
