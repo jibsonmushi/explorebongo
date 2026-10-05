@@ -39,7 +39,7 @@ function ProviderDashboard() {
   return <Inner pp={pp} section={section} go={(k) => navigate({ to: "/provider", search: { section: k } })} />;
 }
 
-function Inner({ pp, section, go }: { pp: NonNullable<ReturnType<typeof useProviderQueryShape>>; section: string; go: (k: string) => void }) {
+function Inner({ pp, section, go }: { pp: ProviderRow; section: string; go: (k: string) => void }) {
   const svc = useProviderServices(pp?.id);
   const its = useProviderItems(pp?.id);
   const pending = (its.data ?? []).filter((r) => r.status === "requested").length;
@@ -92,4 +92,3 @@ function Inner({ pp, section, go }: { pp: NonNullable<ReturnType<typeof useProvi
 }
 
 type ProviderRow = import("@/integrations/supabase/types").Database["public"]["Tables"]["provider_profiles"]["Row"] | null;
-function useProviderQueryShape(): ProviderRow { return null; }
