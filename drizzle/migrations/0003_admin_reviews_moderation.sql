@@ -1,0 +1,1 @@
+CREATE POLICY "admin moderate reviews" ON public.reviews FOR DELETE TO authenticated USING (public.has_role(auth.uid(),'admin'));

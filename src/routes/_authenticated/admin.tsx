@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardShell, Placeholder, StatCard, NoAccess } from "@/components/dashboard/DashboardShell";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { AdminServices, AdminBookings, AdminPayments, AdminPayouts, AdminReviews, AdminSupport, AdminAudit } from "@/components/dashboard/AdminSections";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -86,7 +87,14 @@ function Admin() {
           </table>
         </div>
       )}
-      {!["overview", "users", "providers", "verification"].includes(section) && <Placeholder label={label} />}
+      {section === "services" && <AdminServices />}
+      {section === "bookings" && <AdminBookings />}
+      {section === "payments" && <AdminPayments />}
+      {section === "payouts" && <AdminPayouts />}
+      {section === "reviews" && <AdminReviews />}
+      {section === "support" && <AdminSupport />}
+      {section === "audit" && <AdminAudit />}
+      {["analytics", "settings"].includes(section) && <Placeholder label={label} />}
     </DashboardShell>
   );
 }

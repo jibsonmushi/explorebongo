@@ -7,6 +7,7 @@ import { DashboardShell, Placeholder, StatCard } from "@/components/dashboard/Da
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MyTrips, TripPlanner } from "@/components/dashboard/TouristSections";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   validateSearch: (s: Record<string, unknown>) => ({ section: typeof s["section"] === "string" ? (s["section"] as string) : undefined } as { section?: string | undefined }),
@@ -44,7 +45,7 @@ function TouristDashboard() {
         <div className="space-y-6">
           <h2 className="text-3xl font-semibold">Karibu{profile.data?.first_name ? `, ${profile.data.first_name}` : ""}!</h2>
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard label="Trips" value="0" hint="Booking opens in a later phase" />
+            <StatCard label="Trips" value={<Link to="/dashboard" search={{ section: "trips" }} className="underline">View</Link>} />
             <StatCard label="Favorites" value="0" />
             <StatCard label="Itineraries" value="0" />
           </div>
@@ -52,9 +53,9 @@ function TouristDashboard() {
         </div>
       )}
       {section === "discover" && <div><Placeholder label="Discover" /><Button asChild className="mt-4"><Link to="/discover">Open public Discover page</Link></Button></div>}
-      {section === "trips" && <Placeholder label="My Trips" />}
+      {section === "trips" && <MyTrips userId={user.id} />}
       {section === "favorites" && <Placeholder label="Favorites" />}
-      {section === "planner" && <Placeholder label="AI Trip Planner" />}
+      {section === "planner" && <TripPlanner userId={user.id} />}
       {section === "support" && <Placeholder label="Support" />}
       {section === "profile" && profile.data && <ProfileForm profile={profile.data} onSaved={() => profile.refetch()} />}
     </DashboardShell>

@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DashboardShell, Placeholder, StatCard, NoAccess } from "@/components/dashboard/DashboardShell";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
+import { useNavigate } from "@tanstack/react-router";
+import { MyServices, AddService, BookingRequests, Earnings, useProviderItems, useProviderServices } from "@/components/dashboard/ProviderSections";
 
 export const Route = createFileRoute("/_authenticated/provider")({
   validateSearch: (s: Record<string, unknown>) => ({ section: typeof s["section"] === "string" ? (s["section"] as string) : undefined } as { section?: string | undefined }),
@@ -20,6 +22,7 @@ const items = [
 function ProviderDashboard() {
   const section = Route.useSearch().section ?? "overview";
   const { user } = Route.useRouteContext();
+  const navigate = useNavigate();
   const q = useQuery({
     queryKey: ["provider", user.id],
     queryFn: async () => {
@@ -33,6 +36,15 @@ function ProviderDashboard() {
   if (q.isLoading) return <div className="p-10">Loading…</div>;
   if (!q.data?.isProvider) return <NoAccess />;
   const pp = q.data.pp;
+  return <Inner pp={pp} section={section} go={(k) => navigate({ to: "/provider", search: { section: k } })} />;
+}
+
+function Inner({ pp, section, go }: { pp: ProviderRow; section: string; go: (k: string) => void }) {
+  const svc = useProviderServices(pp?.id);
+  const its = useProviderItems(pp?.id);
+  const pending = (its.data ?? []).filter((r) => r.status === "requested").length;
+  const booked = (its.data ?? []).filter((r) => r.status === "confirmed" || r.status === "completed");
+  const net = booked.reduce((a, r) => a + Number(r.unit_price) * r.quantity, 0) * 0.9;
   const label = items.find((i) => i.key === section)?.label ?? "Dashboard";
 
   return (
@@ -47,8 +59,8 @@ function ProviderDashboard() {
             <p className="rounded-xl border bg-accent p-4 text-sm">Your business is awaiting verification. Services become visible to travelers once approved.</p>
           )}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Services" value="0" /><StatCard label="Booking requests" value="0" />
-            <StatCard label="Bookings" value="0" /><StatCard label="Earnings" value="—" hint="Payments in a later phase" />
+            <StatCard label="Services" value={svc.data?.length ?? 0} /><StatCard label="Booking requests" value={pending} />
+            <StatCard label="Bookings" value={booked.length} /><StatCard label="Net earnings" value={net.toLocaleString(undefined, { maximumFractionDigits: 0 })} hint="After 10% commission" />
           </div>
         </div>
       )}
@@ -68,7 +80,15 @@ function ProviderDashboard() {
           <p className="text-sm text-muted-foreground">{pp.documents_pending ? "You indicated that you'll submit verification documents." : "Please plan to submit verification documents."} Document upload will be available in a later phase.</p>
         </div>
       )}
-      {!["overview", "business", "verification"].includes(section) && <Placeholder label={label} />}
+      {pp && section === "services" && <MyServices providerId={pp.id} />}
+      {pp && section === "add-service" && <AddService providerId={pp.id} onDone={() => { svc.refetch(); go("services"); }} />}
+      {pp && section === "requests" && <BookingRequests providerId={pp.id} pendingOnly />}
+      {pp && section === "bookings" && <BookingRequests providerId={pp.id} pendingOnly={false} />}
+      {pp && (section === "earnings" || section === "payouts") && <Earnings providerId={pp.id} />}
+      {!pp && section !== "overview" && <p className="text-muted-foreground">No business profile found for this account.</p>}
+      {["availability", "reviews", "settings"].includes(section) && <Placeholder label={label} />}
     </DashboardShell>
   );
 }
+
+type ProviderRow = import("@/integrations/supabase/types").Database["public"]["Tables"]["provider_profiles"]["Row"] | null;
