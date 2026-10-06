@@ -699,6 +699,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_booking: {
+        Args: { _booking_id: string; _item_id?: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

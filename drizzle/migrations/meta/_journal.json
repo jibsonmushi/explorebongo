@@ -36,6 +36,13 @@
       "when": 1791175206979,
       "tag": "0004_bootstrap_admin_email",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791260780143,
+      "tag": "0005_booking_capacity_and_guards",
+      "breakpoints": true
     }
   ]
 }
