@@ -5,6 +5,7 @@ import { DashboardShell, Placeholder, StatCard, NoAccess } from "@/components/da
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { useNavigate } from "@tanstack/react-router";
 import { MyServices, AddService, BookingRequests, Earnings, useProviderItems, useProviderServices } from "@/components/dashboard/ProviderSections";
+import { AvailabilityManager } from "@/components/dashboard/Availability";
 
 export const Route = createFileRoute("/_authenticated/provider")({
   validateSearch: (s: Record<string, unknown>) => ({ section: typeof s["section"] === "string" ? (s["section"] as string) : undefined } as { section?: string | undefined }),
@@ -85,8 +86,9 @@ function Inner({ pp, section, go }: { pp: ProviderRow; section: string; go: (k: 
       {pp && section === "requests" && <BookingRequests providerId={pp.id} pendingOnly />}
       {pp && section === "bookings" && <BookingRequests providerId={pp.id} pendingOnly={false} />}
       {pp && (section === "earnings" || section === "payouts") && <Earnings providerId={pp.id} />}
+      {pp && section === "availability" && <AvailabilityManager providerId={pp.id} />}
       {!pp && section !== "overview" && <p className="text-muted-foreground">No business profile found for this account.</p>}
-      {["availability", "reviews", "settings"].includes(section) && <Placeholder label={label} />}
+      {["reviews", "settings"].includes(section) && <Placeholder label={label} />}
     </DashboardShell>
   );
 }

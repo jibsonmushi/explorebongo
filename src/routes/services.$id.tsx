@@ -37,7 +37,13 @@ function ServicePage() {
     queryKey: ["service-reviews", id],
     queryFn: async () => (await supabase.from("reviews").select("rating,comment,created_at").eq("service_id", id).order("created_at", { ascending: false })).data ?? [],
   });
+  const avail = useQuery({
+    queryKey: ["avail", id, date],
+    enabled: !!date,
+    queryFn: async () => (await supabase.from("availability").select("capacity,booked").eq("service_id", id).eq("date", date).maybeSingle()).data,
+  });
   const s = q.data;
+  const left = !date ? null : avail.data ? Math.max(avail.data.capacity - avail.data.booked, 0) : (s?.capacity ?? null);
   if (q.isLoading) return <PublicLayout><p className="p-10">Loading…</p></PublicLayout>;
   if (!s) return <PublicLayout><div className="p-10 text-center"><h1 className="text-2xl font-semibold">Service not found</h1><Link to="/discover" className="mt-4 inline-block text-primary underline">Back to Discover</Link></div></PublicLayout>;
   const avg = reviews.data?.length ? (reviews.data.reduce((a, r) => a + r.rating, 0) / reviews.data.length).toFixed(1) : null;
@@ -71,8 +77,9 @@ function ServicePage() {
           <p className="font-display text-3xl font-semibold text-primary">{s.currency} {Number(s.price).toLocaleString()}</p>
           <p className="text-xs text-muted-foreground">per person / unit</p>
           <div className="space-y-1.5"><Label htmlFor="d">Date</Label><Input id="d" type="date" min={new Date().toISOString().slice(0, 10)} value={date} onChange={(e) => setDate(e.target.value)} /></div>
-          <div className="space-y-1.5"><Label htmlFor="q">Guests / units</Label><Input id="q" type="number" min={1} max={s.capacity ?? 50} value={qty} onChange={(e) => setQty(Math.max(1, Number(e.target.value)))} /></div>
-          <Button className="w-full" size="lg" variant="gold" onClick={add}>Add to my trip</Button>
+          {left !== null && <p className={`text-sm ${left > 0 ? "text-muted-foreground" : "text-destructive"}`}>{left > 0 ? `${left} spot(s) left on this date` : "Fully booked on this date"}</p>}
+          <div className="space-y-1.5"><Label htmlFor="q">Guests / units</Label><Input id="q" type="number" min={1} max={left ?? s.capacity ?? 50} value={qty} onChange={(e) => setQty(Math.max(1, Number(e.target.value)))} /></div>
+          <Button className="w-full" size="lg" variant="gold" onClick={add} disabled={left !== null && qty > left}>Add to my trip</Button>
         </aside>
       </section>
     </PublicLayout>

@@ -17,6 +17,12 @@ export function MyTrips({ userId }: { userId: string }) {
     queryKey: ["my-trips", userId],
     queryFn: async () => (await supabase.from("bookings").select("id,status,total_amount,currency,notes,created_at,booking_items(id,date,quantity,unit_price,status,services(title,currency))").eq("tourist_id", userId).order("created_at", { ascending: false })).data ?? [],
   });
+  const cancel = async (bookingId: string, itemId?: string) => {
+    if (!confirm(itemId ? "Cancel this part of your trip?" : "Cancel the whole trip?")) return;
+    const { error } = await supabase.rpc("cancel_booking", itemId ? { _booking_id: bookingId, _item_id: itemId } : { _booking_id: bookingId });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Cancelled"); q.refetch();
+  };
   if (q.isLoading) return <p>Loading…</p>;
   if (!q.data?.length) return (
     <div className="rounded-2xl border-2 border-dashed p-10 text-center text-muted-foreground">
@@ -32,13 +38,26 @@ export function MyTrips({ userId }: { userId: string }) {
               <p className="font-semibold">Trip requested {new Date(b.created_at).toLocaleDateString()}</p>
               <p className="text-sm text-muted-foreground">Total {b.currency} {Number(b.total_amount).toLocaleString()}</p>
             </div>
-            <StatusBadge status={b.status} />
+            <div className="flex items-center gap-2">
+              <StatusBadge status={b.status} />
+              {b.booking_items.some((i) => i.status === "requested" || i.status === "confirmed") && (
+                <Button size="sm" variant="outline" onClick={() => cancel(b.id)}>Cancel trip</Button>
+              )}
+            </div>
           </div>
+          {b.status === "requested" && b.booking_items.some((i) => i.status === "confirmed") && (
+            <p className="mt-2 text-xs text-muted-foreground">Partially confirmed — waiting on the remaining providers.</p>
+          )}
           <ul className="mt-4 divide-y">
             {b.booking_items.map((i) => (
               <li key={i.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
-                <span><span className="font-medium">{i.services?.title}</span> · {i.date ?? "—"} · {i.quantity} guest(s)</span>
-                <StatusBadge status={i.status} />
+                <span><span className="font-medium">{i.services?.title}</span> · {i.date ?? "—"} · {i.quantity} guest(s) · {i.services?.currency} {(Number(i.unit_price) * i.quantity).toLocaleString()}</span>
+                <span className="flex items-center gap-2">
+                  <StatusBadge status={i.status} />
+                  {(i.status === "requested" || i.status === "confirmed") && (
+                    <button className="text-xs text-destructive underline" onClick={() => cancel(b.id, i.id)}>Cancel</button>
+                  )}
+                </span>
               </li>
             ))}
           </ul>
