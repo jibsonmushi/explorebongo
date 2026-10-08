@@ -22,6 +22,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedProviderRouteImport } from './routes/_authenticated/provider'
 import { Route as ProviderRegisterRouteImport } from './routes/provider.register'
 import { Route as ServicesIdRouteImport } from './routes/services.$id'
+import { Route as AuthenticatedCheckoutBookingIdRouteImport } from './routes/_authenticated/checkout.$bookingId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -87,6 +88,12 @@ const ServicesIdRoute = ServicesIdRouteImport.update({
   path: '/services/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCheckoutBookingIdRoute =
+  AuthenticatedCheckoutBookingIdRouteImport.update({
+    id: '/checkout/$bookingId',
+    path: '/checkout/$bookingId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/provider': typeof AuthenticatedProviderRoute
   '/provider/register': typeof ProviderRegisterRoute
   '/services/$id': typeof ServicesIdRoute
+  '/checkout/$bookingId': typeof AuthenticatedCheckoutBookingIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -115,6 +123,7 @@ export interface FileRoutesByTo {
   '/provider': typeof AuthenticatedProviderRoute
   '/provider/register': typeof ProviderRegisterRoute
   '/services/$id': typeof ServicesIdRoute
+  '/checkout/$bookingId': typeof AuthenticatedCheckoutBookingIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -131,6 +140,7 @@ export interface FileRoutesById {
   '/_authenticated/provider': typeof AuthenticatedProviderRoute
   '/provider/register': typeof ProviderRegisterRoute
   '/services/$id': typeof ServicesIdRoute
+  '/_authenticated/checkout/$bookingId': typeof AuthenticatedCheckoutBookingIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/provider'
     | '/provider/register'
     | '/services/$id'
+    | '/checkout/$bookingId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/provider'
     | '/provider/register'
     | '/services/$id'
+    | '/checkout/$bookingId'
   id:
     | '__root__'
     | '/'
@@ -176,6 +188,7 @@ export interface FileRouteTypes {
     | '/_authenticated/provider'
     | '/provider/register'
     | '/services/$id'
+    | '/_authenticated/checkout/$bookingId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/checkout/$bookingId': {
+      id: '/_authenticated/checkout/$bookingId'
+      path: '/checkout/$bookingId'
+      fullPath: '/checkout/$bookingId'
+      preLoaderRoute: typeof AuthenticatedCheckoutBookingIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -291,12 +311,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProviderRoute: typeof AuthenticatedProviderRoute
+  AuthenticatedCheckoutBookingIdRoute: typeof AuthenticatedCheckoutBookingIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProviderRoute: AuthenticatedProviderRoute,
+  AuthenticatedCheckoutBookingIdRoute: AuthenticatedCheckoutBookingIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
