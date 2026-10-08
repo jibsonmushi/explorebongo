@@ -43,6 +43,13 @@
       "when": 1791260780143,
       "tag": "0005_booking_capacity_and_guards",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791436347666,
+      "tag": "0006_phase2_payments",
+      "breakpoints": true
     }
   ]
 }

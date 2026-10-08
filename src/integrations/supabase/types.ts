@@ -143,6 +143,8 @@ export type Database = {
           currency: string
           id: string
           notes: string | null
+          payment_state: string
+          reference: string | null
           status: Database["public"]["Enums"]["booking_status"]
           total_amount: number
           tourist_id: string
@@ -153,6 +155,8 @@ export type Database = {
           currency?: string
           id?: string
           notes?: string | null
+          payment_state?: string
+          reference?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           total_amount?: number
           tourist_id: string
@@ -163,6 +167,8 @@ export type Database = {
           currency?: string
           id?: string
           notes?: string | null
+          payment_state?: string
+          reference?: string | null
           status?: Database["public"]["Enums"]["booking_status"]
           total_amount?: number
           tourist_id?: string
@@ -191,27 +197,72 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_settings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          id: string
+          is_active: boolean
+          rate: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          id?: string
+          is_active?: boolean
+          rate: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          id?: string
+          is_active?: boolean
+          rate?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       commissions: {
         Row: {
           amount: number
           booking_item_id: string
           created_at: string
+          currency: string | null
+          gross_amount: number | null
           id: string
+          payment_id: string | null
+          provider_net: number | null
           rate: number
+          refunded_amount: number
         }
         Insert: {
           amount: number
           booking_item_id: string
           created_at?: string
+          currency?: string | null
+          gross_amount?: number | null
           id?: string
+          payment_id?: string | null
+          provider_net?: number | null
           rate: number
+          refunded_amount?: number
         }
         Update: {
           amount?: number
           booking_item_id?: string
           created_at?: string
+          currency?: string | null
+          gross_amount?: number | null
           id?: string
+          payment_id?: string | null
+          provider_net?: number | null
           rate?: number
+          refunded_amount?: number
         }
         Relationships: [
           {
@@ -219,6 +270,13 @@ export type Database = {
             columns: ["booking_item_id"]
             isOneToOne: false
             referencedRelation: "booking_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
             referencedColumns: ["id"]
           },
         ]
@@ -339,27 +397,60 @@ export type Database = {
           booking_id: string
           created_at: string
           currency: string
+          customer_id: string | null
+          failed_at: string | null
           id: string
+          metadata: Json
+          paid_at: string | null
+          payment_method: string | null
+          payment_provider: string | null
           provider_ref: string | null
+          refunded_amount: number
+          refunded_at: string | null
+          state: string
           status: Database["public"]["Enums"]["payment_status"]
+          transaction_reference: string | null
+          updated_at: string
         }
         Insert: {
           amount: number
           booking_id: string
           created_at?: string
           currency?: string
+          customer_id?: string | null
+          failed_at?: string | null
           id?: string
+          metadata?: Json
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_provider?: string | null
           provider_ref?: string | null
+          refunded_amount?: number
+          refunded_at?: string | null
+          state?: string
           status?: Database["public"]["Enums"]["payment_status"]
+          transaction_reference?: string | null
+          updated_at?: string
         }
         Update: {
           amount?: number
           booking_id?: string
           created_at?: string
           currency?: string
+          customer_id?: string | null
+          failed_at?: string | null
           id?: string
+          metadata?: Json
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_provider?: string | null
           provider_ref?: string | null
+          refunded_amount?: number
+          refunded_at?: string | null
+          state?: string
           status?: Database["public"]["Enums"]["payment_status"]
+          transaction_reference?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -447,27 +538,51 @@ export type Database = {
           amount: number
           created_at: string
           currency: string
+          failed_at: string | null
+          failure_reason: string | null
           id: string
+          notes: string | null
           paid_at: string | null
+          payment_method: string | null
+          payout_reference: string | null
+          processed_at: string | null
           provider_id: string
+          requested_at: string
+          state: string
           status: Database["public"]["Enums"]["payment_status"]
         }
         Insert: {
           amount: number
           created_at?: string
           currency?: string
+          failed_at?: string | null
+          failure_reason?: string | null
           id?: string
+          notes?: string | null
           paid_at?: string | null
+          payment_method?: string | null
+          payout_reference?: string | null
+          processed_at?: string | null
           provider_id: string
+          requested_at?: string
+          state?: string
           status?: Database["public"]["Enums"]["payment_status"]
         }
         Update: {
           amount?: number
           created_at?: string
           currency?: string
+          failed_at?: string | null
+          failure_reason?: string | null
           id?: string
+          notes?: string | null
           paid_at?: string | null
+          payment_method?: string | null
+          payout_reference?: string | null
+          processed_at?: string | null
           provider_id?: string
+          requested_at?: string
+          state?: string
           status?: Database["public"]["Enums"]["payment_status"]
         }
         Relationships: [
@@ -533,6 +648,60 @@ export type Database = {
           verification_status?: Database["public"]["Enums"]["verification_status"]
         }
         Relationships: []
+      }
+      refunds: {
+        Row: {
+          amount: number
+          booking_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          payment_id: string
+          reason: string
+          reference: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          booking_id: string
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          id?: string
+          payment_id: string
+          reason: string
+          reference?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          payment_id?: string
+          reason?: string
+          reference?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -699,9 +868,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_refund: {
+        Args: { _amount: number; _payment_id: string; _reason: string }
+        Returns: string
+      }
+      admin_update_payout: {
+        Args: {
+          _id: string
+          _notes?: string
+          _reason?: string
+          _reference?: string
+          _state: string
+        }
+        Returns: undefined
+      }
       cancel_booking: {
         Args: { _booking_id: string; _item_id?: string }
         Returns: undefined
+      }
+      complete_test_payment: {
+        Args: { _payment_id: string; _success: boolean }
+        Returns: string
       }
       has_role: {
         Args: {
@@ -710,6 +897,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      my_provider_finance: { Args: never; Returns: Json }
+      provider_balance: { Args: { _provider_id: string }; Returns: number }
+      request_payout: {
+        Args: { _amount: number; _method: string }
+        Returns: string
+      }
+      set_commission_rate: { Args: { _percent: number }; Returns: undefined }
+      start_checkout: { Args: { _booking_id: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "provider" | "tourist" | "support"
