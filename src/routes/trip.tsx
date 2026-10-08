@@ -44,8 +44,8 @@ function TripPage() {
     setBusy(false);
     if (e2) { toast.error(e2.message); return; }
     tripCart.clear();
-    toast.success("Booking request sent to providers!");
-    navigate({ to: "/dashboard", search: { section: "trips" } });
+    toast.success("Trip created — continue to checkout");
+    navigate({ to: "/checkout/$bookingId", params: { bookingId: b.id } });
   };
 
   return (
