@@ -110,16 +110,83 @@ export function BookingRequests({ providerId, pendingOnly }: { providerId: strin
   );
 }
 
+type FinanceRow = {
+  reference: string | null;
+  date: string | null;
+  service: string;
+  status: string;
+  gross: number | null;
+  rate: number;
+  commission: number | null;
+  net: number | null;
+  refunded: number | null;
+  currency: string | null;
+};
+
+type FinanceData = {
+  gross: number;
+  commission: number;
+  net: number;
+  refunds: number;
+  pending: number;
+  paid_out: number;
+  available: number;
+  rows: FinanceRow[];
+};
+
 export function Earnings({ providerId }: { providerId: string }) {
-  const q = useProviderItems(providerId);
+  const finance = useQuery({
+    queryKey: ["my-finance"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("my_provider_finance");
+      if (error) throw error;
+      if (!data) throw new Error("No finance data returned");
+      return data as unknown as FinanceData;
+    },
+  });
   const payouts = useQuery({ queryKey: ["my-payouts", providerId], queryFn: async () => (await supabase.from("provider_payouts").select("*").eq("provider_id", providerId).order("created_at", { ascending: false })).data ?? [] });
-  const done = (q.data ?? []).filter((r) => r.status === "confirmed" || r.status === "completed");
-  const gross = done.reduce((a, r) => a + Number(r.unit_price) * r.quantity, 0);
+
+  if (finance.isLoading) return <p className="text-muted-foreground">Loading earnings…</p>;
+  if (finance.error) return <p className="text-sm text-destructive">Could not load earnings: {finance.error.message}</p>;
+  const d = finance.data;
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card l="Gross bookings" v={gross} /><Card l="Platform commission (10%)" v={gross * 0.1} /><Card l="Your net" v={gross * 0.9} />
+        <Card l="Gross earnings" v={d?.gross ?? 0} />
+        <Card l="Platform commission" v={d?.commission ?? 0} />
+        <Card l="Net earnings" v={d?.net ?? 0} />
       </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card l="Refunds" v={d?.refunds ?? 0} />
+        <Card l="Paid out" v={d?.paid_out ?? 0} />
+        <Card l="Available balance" v={d?.available ?? 0} />
+      </div>
+      {d && d.rows.length > 0 ? (
+        <>
+          <h3 className="text-lg font-semibold">Earnings breakdown</h3>
+          <div className="overflow-x-auto rounded-2xl border bg-card">
+            <table className="w-full text-sm">
+              <thead className="bg-muted text-left"><tr>{["Booking", "Service", "Date", "Status", "Gross", "Commission", "Net"].map((h) => <th key={h} className="p-3">{h}</th>)}</tr></thead>
+              <tbody>
+                {d.rows.map((r, i) => (
+                  <tr key={i} className="border-t">
+                    <td className="p-3 font-mono text-xs">{r.reference ?? "—"}</td>
+                    <td className="p-3">{r.service}</td>
+                    <td className="p-3">{r.date ?? "—"}</td>
+                    <td className="p-3"><StatusBadge status={r.status} /></td>
+                    <td className="p-3">{r.currency ?? ""} {Number(r.gross ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                    <td className="p-3">{r.currency ?? ""} {Number(r.commission ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                    <td className="p-3 font-semibold">{r.currency ?? ""} {Number(r.net ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <p className="rounded-2xl border-2 border-dashed p-10 text-center text-muted-foreground">No earnings yet. You'll see financial details here once travelers pay for your services.</p>
+      )}
       <h3 className="text-lg font-semibold">Payouts</h3>
       {payouts.data?.length ? payouts.data.map((p) => (
         <div key={p.id} className="flex items-center justify-between rounded-xl border bg-card p-4"><span>{p.currency} {Number(p.amount).toLocaleString()}</span><StatusBadge status={p.status} /></div>

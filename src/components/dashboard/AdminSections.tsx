@@ -48,8 +48,10 @@ export function AdminPayments() {
 export function AdminPayouts() {
   const q = useQuery({ queryKey: ["admin-payouts"], queryFn: async () => (await supabase.from("provider_payouts").select("id,amount,currency,status,created_at,provider_profiles(business_name)").order("created_at", { ascending: false })).data ?? [] });
   const markPaid = async (id: string) => {
-    const { error } = await supabase.from("provider_payouts").update({ status: "paid", paid_at: new Date().toISOString() }).eq("id", id);
-    if (error) { toast.error(error.message); return; } toast.success("Marked paid"); q.refetch();
+    const reference = `MANUAL-${Date.now().toString(36).toUpperCase()}`;
+    const { error } = await supabase.rpc("admin_update_payout", { _id: id, _state: "PAID", _reference: reference });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Payout marked as paid"); q.refetch();
   };
   if (!q.data?.length) return <Empty t="No payouts yet." />;
   return <div className="space-y-3">{q.data.map((p) => <Row key={p.id}><span className="flex-1">{p.provider_profiles?.business_name} · {p.currency} {Number(p.amount).toLocaleString()}</span><StatusBadge status={p.status} />{p.status === "pending" && <Button size="sm" onClick={() => markPaid(p.id)}>Mark paid</Button>}</Row>)}</div>;
